@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Translator box
+Name[el]=Κουτί μεταφράσεων
+GenericName=Online translator
+Comment=Uses Google translate to translate user input string
+Categories=Network;Office;
+Keywords=Google;translation;translate;online;web;fkol-k4
+Icon=/usr/share/icons/fkol-k4/translator-box.svg
+Exec=/usr/local/bin/custom/custom_translator-box
+Terminal=false

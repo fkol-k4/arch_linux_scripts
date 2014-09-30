@@ -1,0 +1,14 @@
+#!/bin/sh
+# Filename__: update-linux-firmware
+# Filetype__: Shell script
+# Purpose___: Downloads latest linux firmware through git
+#             and installs it to the system.
+# Author____: fkol k4
+# Boxes_____: ┌ ─ ┐││└ ─ ┘
+
+cd /tmp/
+    git clone git://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git
+    sudo cp -r linux-firmware/* /lib/firmware/
+    rm -rf linux-firmware
+    sudo mkinitcpio -p linux
+cd ~

@@ -1,0 +1,18 @@
+#!/bin/bash
+# Filename_________: fkol-k4_chroot-binds
+# Filetype_________: Bash script
+# Author___________: fkol k4
+# Address__________: fkolyvas@gmail.com
+# Short description: Bindings for chrooting
+# Frames___________: ┌──┐││└──┘
+
+sudo mount -t proc /proc proc
+sudo mount --rbind /dev dev
+sudo mount --rbind /dev/pts dev/pts
+sudo mount --rbind /sys sys
+sudo mount --rbind /run run
+
+sudo cp -L /etc/resolv.conf etc/resolv.conf
+
+sudo chroot . /bin/bash
+
