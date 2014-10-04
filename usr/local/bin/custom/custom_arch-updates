@@ -7,9 +7,11 @@
 # 	Target		: 	Arch-based distribution
 
 #   CLEAR CONSOLE
+#   =============
 clear
 
 #   SCRIPT VARIABLES DEFINITION
+#   ===========================
 # 1. Our installation is inside a BTRFS subvolume. We need an extra mountpoint
 #    for the system's partition so that we have the ability to manage our 
 #    installation's subvolume (snapshot creation and deletion).
@@ -25,19 +27,20 @@ SUBVOLUME_NAME="my-subvolume-name"
 #    set below (naming scheme: 40_custom-$MY_DISTRO_NAME)
 #    The value below is an example.
 MY_DISTRO_NAME="my-distribution-name"
-# 4. The mountpoint list for every distribution that we want to transfer our 
-#    GRUB2 entry to. In case the target distribution is installed directly inside
+# 4. The mountpoint(s) for every distribution that we want to transfer our GRUB2 
+#    entry to. In case the target distribution is installed directly inside
 #    a filesystem (ext4 type installation), we need a direct mount point.
 #    In case the target distribution is installed inside a BTRFS subvolume, we
 #    only need the mountpoint of the partition containing the BTRFS subvolume.
 #    Those mountpoints must have their own /etc/fstab entries.
+#    There are 2 mountpoint variable examples in this script and one loop for
+#    each variable. Add or remove if necessary.
 #    The values below are an example.
-GRUB_TRANSFER_MOUNTPOINTS="
-    /mnt/distribution-X
-    /mnt/btrfs-partition-x
-    "
+GRUB_TRANSFER_MOUNTPOINT_1="/mnt/distribution-X"
+GRUB_TRANSFER_MOUNTPOINT_2="/mnt/btrfs-partition-x"
 
 #   SNAPSHOTS
+#   =========
 #   1. Delete every snapshot except the last one taken.
 for i in $(ls $ROOT_PARTITION_MOUNTPOINT/ | sort | grep $SUBVOLUME_NAME-snapshot-on- | head -n -1); do
     sudo btrfs subvolume delete "$ROOT_PARTITION_MOUNTPOINT/$i"
@@ -45,15 +48,22 @@ done
 #   2. Create a new snapshot
 sudo btrfs subvolume snapshot "$ROOT_PARTITION_MOUNTPOINT/$SUBVOLUME_NAME" "$ROOT_PARTITION_MOUNTPOINT/$SUBVOLUME_NAME-snapshot-on-$(date +%Y-%m-%d-%T)"
 
-#   UPDATES
+#   PACKAGE UPDATES
+#   ===============
 #   1. Update official repository packages
 sudo pacman -Syyvu
-#   2. Update AUR packages (using Pacaur)
-pacaur --check
-pacaur --update
-#pacaur --update --noconfirm
+#   2. Update AUR packages
+if [[ `which pacaur` ]]; then
+    # a. using pacaur if installed
+    pacaur --check
+    pacaur --update
+elif [[ `which yaourt` ]]; then
+    # b. using yaourt if installed
+    yaourt -Sau
+fi
 
 #   GRUB2 HANDLING
+#   ==============
 #   1. Update GRUB2 configuration
 sudo grub-mkconfig -o /boot/grub/grub.cfg
 #   2. Offer GRUB2 installation for every disk on the system
@@ -73,6 +83,7 @@ done
 
 
 #   STANDARD MAINTENANCE (comment each loop to disable)
+#   ===================================================
 #   1. remove '.goutputstream-*' files from user's home folder
 for user_dir in /home/*; do
     rm -f "$user_dir"/.goutputstream-*
@@ -87,7 +98,8 @@ if [ -d /usr/share/gnome/autostart ]; then
 fi
 
 #   MAKE A GRUB2 ENTRY FOR ALL OTHER MOUNTED DISTROS
-#   Create temporary working directory
+#   ================================================
+#  Create temporary working directory
 mkdir -p /tmp/custom-grub
 #   Creating GRUB2 entry
 echo '#!/bin/sh
@@ -98,28 +110,41 @@ exec tail -n +3 $0
 ' | sudo tee /tmp/custom-grub/40_custom-$MY_DISTRO_NAME
 #   Create the rest of custom grub entry
 sudo sed '/### BEGIN \/etc\/grub.d\/10_linux ###/,/### END \/etc\/grub.d\/10_linux ###/!d' /boot/grub/grub.cfg | sudo tee /tmp/custom-grub/stage1
-sudo sed '/menuentry/,/### END \/etc\/grub.d\/10_linux ###/!d' /tmp/custom-grub/stage1 | sudo tee -a /tmp/custom-grub/40_custom-$MY_DISTRO_NAME
+sudo sed '/menuentry/,/### END \/etc\/grub.d\/10_linux ###/!d' /tmp/custom-grub/stage1 | sudo tee -a "/tmp/custom-grub/40_custom-$MY_DISTRO_NAME"
 #   Give custom grub entry executable permissions
-sudo chmod +x /tmp/custom-grub/40_custom-$MY_DISTRO_NAME
-#   Copy custom grub entry file to all predetermined mount points
-for mountpoint in $GRUB_TRANSFER_MOUNTPOINTS/* ; do
-    # transfer grub entry if distro is directly mounted on a mountpoint
-    if [ -d "$mountpoint/etc/grub.d" ]; then 
-        sudo cp "/tmp/custom-grub/40_custom-$MY_DISTRO_NAME" "$mountpoint/etc/grub.d/40_custom-$MY_DISTRO_NAME"
-    fi
-    for distro in $mountpoint/* ; do
-        # transfer grub entry if distro is inside a mountpoint's subvolume
-        if [ -d "$mountpoint/$distro/etc/grub.d" ]; then 
-            sudo cp "/tmp/custom-grub/40_custom-$MY_DISTRO_NAME" "$mountpoint/$distro/etc/grub.d/40_custom-$MY_DISTRO_NAME"
-        fi
-    done
+sudo chmod +x "/tmp/custom-grub/40_custom-$MY_DISTRO_NAME"
+
+#   COPY CUSTOM GRUB ENTRY FILE TO ALL PREDETERMINED MOUNT POINTS
+#   =============================================================
+#   First mountpoint
+if [ -d "$GRUB_TRANSFER_MOUNTPOINT_1"/etc/grub.d ]; then
+    # case a: Directly mounted distro
+	sudo cp "/tmp/custom-grub/40_custom-$MY_DISTRO_NAME" "$GRUB_TRANSFER_MOUNTPOINT_1"/etc/grub.d/
+fi
+for subvolume in "$GRUB_TRANSFER_MOUNTPOINT_1"/*; do
+	# case b. Distro inside subvolume
+	if [ -d "$subvolume"/etc/grub.d ]; then
+		sudo cp "/tmp/custom-grub/40_custom-$MY_DISTRO_NAME" "$subvolume"/etc/grub.d/
+	fi
+done
+# Second mountpoint
+if [ -d "$GRUB_TRANSFER_MOUNTPOINT_2"/etc/grub.d ]; then
+    # case a: Directly mounted distro
+	sudo cp "/tmp/custom-grub/40_custom-$MY_DISTRO_NAME" "$GRUB_TRANSFER_MOUNTPOINT_2"/etc/grub.d/
+fi
+for subvolume in "$GRUB_TRANSFER_MOUNTPOINT_2"/*; do
+	# case b. Distro inside subvolume
+	if [ -d "$subvolume"/etc/grub.d ]; then
+		sudo cp "/tmp/custom-grub/40_custom-$MY_DISTRO_NAME" "$subvolume"/etc/grub.d/
+	fi
 done
 #   Delete custom grub entry from own /etc/grub.d/ directory
 sudo rm -f "/etc/grub.d/40_custom-$MY_DISTRO_NAME"
 #   Clear temporary working directory
 sudo rmdir --ignore-fail-on-non-empty "/tmp/custom-grub"
 
-#   UPDATES SCRIPT EXIT
+#   USER NOTIFICATION && UPDATES SCRIPT EXIT
+#   ========================================
 #   1. notofy $USER on terminal
 echo "    Updates script completed."
 echo "    ─────────────────────────"
