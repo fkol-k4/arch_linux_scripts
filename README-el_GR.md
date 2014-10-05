@@ -19,3 +19,8 @@ arch_linux_scrpits
     usr/share/icons/custom/arch-square.svg
 
 _Σιγουρευτείτε πως τα αρχεία_ **usr/local/bin/custom/custom_arch-updates** _και_ **usr/share/applications/custom/custom_arch-updates.desktop** _είναι εκτελέσιμα και τοποθετήστε τα σε ακριβώς την ίδια διαδρομή ώστε το script να μπορεί να καλείται από το αρχείο εκκινητή του μέσω του γραφικού περιβάλλοντος_.
+
+####TODO:
+* Να φτιαχτεί ένα αρχείο τύπου systemd service που θ μεταφέρει την καταχώρηση του GRUB κατά την επανεκκίνηση/τερματισμό.
+* Καλύτερη ελληνική τεκμηρίωση
+* Δημιουργία (ίσως) ενός αρχείου install.sh

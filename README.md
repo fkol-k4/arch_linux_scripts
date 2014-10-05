@@ -19,3 +19,7 @@ If you don't need all these and just want the update and subvolume handling scri
     usr/share/icons/custom/arch-square.svg
 
 _Make sure that the_ **usr/local/bin/custom/custom_arch-updates** _and_ **usr/share/applications/custom/custom_arch-updates.desktop** _files are made executable and keep the same path scheme so that the update scrpit can be launched via its launcher_
+
+#####TODO:
+* Use systemd service file for auto-transferring GRUB2 entry.
+* Maybe create an 'install.sh' installer.
