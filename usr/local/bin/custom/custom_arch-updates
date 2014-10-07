@@ -35,10 +35,10 @@ MY_DISTRO_NAME="my-distribution-name"
 #    only need the mountpoint of the partition containing that BTRFS subvolume.
 #    Each of those mountpoints must have its own /etc/fstab entry.
 #    The values below are an example.
-GRUB_TRANSFER_MOUNTPOINT_LIST="
+GRUB_TRANSFER_MOUNTPOINT_LIST=(
     /mnt/distribution-mountpoint
     /mnt/btrfs-partition-mountpoint
-    "
+    )
 
 #   SNAPSHOTS
 #   =========
@@ -48,6 +48,9 @@ for i in $(ls $ROOT_PARTITION_MOUNTPOINT/ | sort | grep $SUBVOLUME_NAME-snapshot
 done
 #   2. Create a new snapshot
 sudo btrfs subvolume snapshot "$ROOT_PARTITION_MOUNTPOINT/$SUBVOLUME_NAME" "$ROOT_PARTITION_MOUNTPOINT/$SUBVOLUME_NAME-snapshot-on-$(date +%Y-%m-%d-%T)"
+#   3. Sync disk I/O
+sudo sync
+
 
 #   PACKAGE UPDATES
 #   ===============
@@ -62,6 +65,9 @@ elif [[ `which yaourt` ]]; then
     # b. using yaourt if installed
     yaourt -Sau
 fi
+#   3. Sync disk I/O
+sudo sync
+
 
 #   GRUB2 HANDLING
 #   ==============
@@ -116,20 +122,14 @@ sudo sed '/menuentry/,/### END \/etc\/grub.d\/10_linux ###/!d' /tmp/custom-grub/
 #   Give custom grub entry executable permissions
 sudo chmod +x "/tmp/custom-grub/40_custom-$MY_DISTRO_NAME"
 
-#   Creating temporary file for mountpoints list
-touch /tmp/custom-grub/mountpoins.txt
-for entry in $GRUB_TRANSFER_MOUNTPOINT_LIST; do
-    echo $entry >> /tmp/custom-grub/mountpoints.txt
-done
-
 #   COPY CUSTOM GRUB ENTRY FILE TO ALL PREDETERMINED MOUNT POINTS
 #   =============================================================
-for line in $(cat /tmp/custom-grub/mountpoints.txt); do
-    if [ -d $line/etc/grub.d ]; then
+for mountpoint in ${GRUB_TRANSFER_MOUNTPOINT_LIST[*]}; do
+    if [ -d $mountpoint/etc/grub.d ]; then
         # Copy GRUB2 entry if we have a distribution's direct mountpoint
-        sudo cp "/tmp/custom-grub/40_custom-$MY_DISTRO_NAME" $line/etc/grub.d/
+        sudo cp "/tmp/custom-grub/40_custom-$MY_DISTRO_NAME" $mountpoint/etc/grub.d/
     fi
-    for subvolume in $line/*; do
+    for subvolume in $mountpoint/*; do
         # Copy GRUB2 entry if we have a mountpoint for a subvolume's partition
         if [ -d $subvolume/etc/grub.d ]; then
             sudo cp "/tmp/custom-grub/40_custom-$MY_DISTRO_NAME" $subvolume/etc/grub.d/
