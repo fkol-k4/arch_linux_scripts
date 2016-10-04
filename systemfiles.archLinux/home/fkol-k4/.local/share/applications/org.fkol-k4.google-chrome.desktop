@@ -1,0 +1,35 @@
+[Desktop Entry]
+Version=1.0
+Name=Google Chrome
+# Only KDE 4 seems to use GenericName, so we reuse the KDE strings.
+# From Ubuntu's language-pack-kde-XX-base packages, version 9.04-20090413.
+GenericName=Web Browser
+GenericName[el]=Περιηγητής ιστού
+# Gnome and KDE 3 uses Comment.
+Comment=Access the Internet
+Comment[el]=Πρόσβαση στο Διαδίκτυο
+Exec=/usr/bin/google-chrome-stable %U
+Terminal=false
+Icon=google-chrome
+Type=Application
+Categories=Network;WebBrowser;
+MimeType=text/html;text/xml;application/xhtml_xml;image/webp;x-scheme-handler/http;x-scheme-handler/https;x-scheme-handler/ftp;
+X-Ayatana-Desktop-Shortcuts=NewWindow;NewIncognito;IncognitoSearch
+
+[NewWindow Shortcut Group]
+Name=New Window
+Name[el]=Νέο Παράθυρο
+Exec=/usr/bin/google-chrome-stable
+TargetEnvironment=Unity
+
+[NewIncognito Shortcut Group]
+Name=Incognito Window
+Name[el]=Νέο παράθυρο για ανώνυμη περιήγηση
+Exec=/usr/bin/google-chrome-stable --incognito
+TargetEnvironment=Unity
+
+[IncognitoSearch Shortcut Group]
+Name=Incognito Search Window
+Name[el]=Ανώνυμη αναζήτηση
+Exec=/usr/bin/google-chrome-stable --incognito   https://startpage.com/do/mypage.pl?prf=ad35b4d08ebca5271cb02c9cb44fd4f0
+TargetEnvironment=Unity

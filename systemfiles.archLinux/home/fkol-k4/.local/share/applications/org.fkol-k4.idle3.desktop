@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=IDLE (Python 3)
+Comment=Integrated DeveLopment Environment for Python 3
+Exec=/usr/bin/idle3 %U
+TryExec=/usr/bin/idle3
+Icon=/usr/lib/python3.5/idlelib/Icons/idle_48.png
+Terminal=false
+Type=Application
+Categories=Application;Development;
+StartupNotify=true
+MimeType=text/x-python;

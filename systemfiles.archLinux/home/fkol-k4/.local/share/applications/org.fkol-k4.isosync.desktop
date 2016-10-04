@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Ubuntu Iso sync
+GenericName=Iso sync
+Comment=Synchronises daily-live Ubuntu-dev iso images locally.
+Categories=Utility;Network;ConsoleOnly;
+Keywords=ubuntu;iso;image;daily;live;sync;zsync;local;CD;
+Icon=/usr/share/icons/fkol-k4/fkol-k4.ubuntu.square.svg
+Exec=fkol-k4.isosync
+Terminal=true
