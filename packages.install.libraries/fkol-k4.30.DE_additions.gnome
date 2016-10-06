@@ -1,0 +1,109 @@
+#!/bin/bash
+
+#   file: fkol-k4.30.DE_additions.gnome
+#   type: Bash script
+#   Purpose: Installs GNOME related packages
+
+#   Copyright (C) 2016  fkol k4, "fkolyvas at gmail dot com"
+
+#   This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+
+#   You should have received a copy of the GNU General Public License along
+#   with this program; if not, write to the Free Software Foundation, Inc.,
+#   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+
+
+
+#   Unity DE
+nautilus-megasync # AUR
+seahorse-nautilus
+
+
+array=(
+    compizconfig-settings-manager
+    dconf-editor
+    dconf-tools
+    gconf-editor
+    
+    dmz-cursor-theme
+    gnome-extra-icons
+    gnome-icon-theme-*
+    
+    gtk2-engines
+    gtk2-engines-*
+    gtk3-engines-*
+    gtk-theme-config
+    
+    menulibre 
+    
+    nautilus-actions
+    nautilus-emblems
+    nautilus-filename-repairer
+    nautilus-gtkhash
+    nautilus-image-manipulator
+    nautilus-open-terminal
+    nautilus-script-manager
+    nautilus-scripts-manager
+    nautilus-sendto
+    
+    qt4-qtconfig
+    suru-icon-theme
+    unity-tweak-tool
+    
+    recordmydesktop
+    gtk-recordmydesktop
+    soundconverter
+    )
+sudo apt-get --yes install ${array[@]}; sync
+
+
+#   UTF-8 characters indicator
+#   ────────────────────────────────────────────────────────────────────────
+cd /opt/
+    if [ -d /opt/indicator-chars ]; then
+        sudo chown -R $USER /opt/indicator-chars/
+        cd /opt/indicator-chars/
+        git pull
+    else
+        sudo git clone git://github.com/tobyS/indicator-chars.git
+        sudo chown -R $USER /opt/indicator-chars/
+    fi
+    cd $HOME
+#   Set to autostart
+mkdir -p $USER/.config/autostart
+cp $USER/.local/share/applications/indicator-sensors.desktop $USER/.config/autostart/
+
+
+
+#   Generic Unity settings
+#   ────────────────────────────────────────────────────────────────────────
+#   unhide xdg autostart services
+if [ -d /etc/xdg/autostart ]; then
+    sudo sed -i 's/NoDisplay=true/NoDisplay=false/g' /etc/xdg/autostart/*.desktop
+fi
+if [ -d /usr/share/gnome/autostart ]; then
+    sudo sed -i 's/NoDisplay=true/NoDisplay=false/g' /usr/share/gnome/autostart/*.desktop
+fi
+#  gsettings as user
+gsettings set org.gnome.nautilus.preferences always-use-location-entry true
+gsettings set org.gtk.Settings.FileChooser sort-directories-first true
+#  gsettings as root
+sudo su root -c 'gsettings set org.gnome.nautilus.preferences always-use-location-entry true'
+sudo su root -c 'gsettings set org.gtk.Settings.FileChooser sort-directories-first true'
+
+
+#   sync I/O
+sync
+
+
+##  EXIT LIBRARY
+exit

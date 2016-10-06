@@ -1,0 +1,149 @@
+#!/bin/bash
+
+#   file: fkol-k4.20.common_additions
+#   type: Bash script
+#   Purpose: Installs common packages
+
+#   Copyright (C) 2016  fkol k4, "fkolyvas at gmail dot com"
+
+#   This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+
+#   You should have received a copy of the GNU General Public License along
+#   with this program; if not, write to the Free Software Foundation, Inc.,
+#   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+
+function markdown_editors () {
+    # install haroopad & remarkable markdown editors
+    message='1. Installing markdown editors (AUR only)...'
+    clear; echo -e "$message"; sleep 3
+    array=(
+        haroopad
+        remarkable
+        )
+    pacaur --sync --needed --noedit ${array[@]}; sync
+}
+
+function megasync_client() {
+    # install MEGA sync client
+    message='2. Installing MEGA sync client (AUR only)...'
+    clear; echo -e "$message"; sleep 3
+    pacaur --sync --needed --noedit megasync
+}
+
+function web_related() {
+    # repositories
+    message='3. Installing Web related packages...'
+    clear; echo -e "$message"; sleep 3
+    array_repos=(
+        firefox
+        thunderbird
+        links
+        lynx
+        irssi
+        pidgin
+        wireshark-gtk
+        )
+    sudo pacman -S --needed ${array_repos[@]}; sync
+    # AUR
+    array_aur=(
+        google-chrome
+        google-talkplugin
+        )
+    pacaur --sync --needed --noedit ${array_aur[@]}; sync
+}
+
+function media_packages() {
+    # install media-related packages
+    message='4. Installing media-related packages...'
+    clear; echo -e "$message"; sleep 3
+    # repo packages
+    array_repos=(
+        blender
+        inkscape
+        shotwell
+        gimp
+        gimp-plugin-gmic
+        audacity
+        `pacman -Ss mp3 | sort | grep '/mp3' | awk '$0 {print $1}'`
+        pavucontrol
+        pulseaudio
+        pulseaudio-alsa
+        pulseaudio-equalizer
+        pamixer
+        clementine
+        quodlibet
+        mpv
+        vlc
+        npapi-vlc
+        frei0r-plugins
+        mkvtoolnix-gui
+        kdenlive
+        handbrake
+        )
+    sudo apt-get --yes install ${array[@]}; sync
+    # AUR packages
+    array_aur=(
+        gimp-plugin-texturize
+        gimp-plugin-registry
+        )
+    pacaur --sync --needed --noedit ${array_aur[@]}; sync
+}
+
+function office() {
+    # install office-related stuff
+    message='5. Installing Office-related packages...'
+    clear; echo -e "$message"; sleep 3
+    array=(
+        libreoffice
+        seahorse
+        cups
+        cups-filters
+        cups-pdf
+        cups-pk-helper
+        system-config-printer
+        hplip
+        aspell
+        aspell-el
+        aspell-en
+        aspell-fr
+        catfish
+        `pacman -Ss font | sort | grep ttf | awk '$0 {print $1}'`
+        `pacman -Ss font | grep adobe- | awk '$0 {print $1}'`
+        noto-fonts
+        fontforge
+        gucharmap
+        brasero
+        )
+    sudo pacman -S --needed ${array[@]}; sync
+    #   Local windows fonts
+    font_source="$HOME/Public/Windows_Fonts_Collection"
+    font_dest="/usr/share/fonts/windows_fonts"
+    if [[ -d "$font_source" ]]; then
+        sudo cp -r "$font_source" "$font_dest"; sync
+        sudo fc-cache -fv
+    fi
+}
+
+function main() {
+    message='00. Running file "fkol-k4.20.common_additions"...'
+    clear; echo -e "$message"; sleep 3
+    # main function. Run all functions above.
+    markdown_editors
+    megasync_client
+    web_related
+    media_packages
+    office
+    sync
+}
+
+main "$@"
+exit 0

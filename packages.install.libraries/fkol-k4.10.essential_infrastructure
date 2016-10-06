@@ -1,0 +1,158 @@
+#!/bin/bash
+
+#   file: essential_infrastructure.sh
+#   type: Bash script
+#   Purpose: Installs essential packages
+
+#   Copyright (C) 2016  fkol k4, "fkolyvas at gmail dot com"
+
+#   This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+
+#   You should have received a copy of the GNU General Public License along
+#   with this program; if not, write to the Free Software Foundation, Inc.,
+#   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+
+#   Defining script functions
+function essential_utilities() {
+    #   Kernel extras & essential utilities
+    message="1. Installing Kernel extras & essential utilities..."
+    clear; echo -e "$message"; sleep 3
+    array=(
+        sudo
+        expac
+        base-devel
+        cpulimit
+        lsb-release
+        dialog
+        fakeroot
+        gksu
+        ncurses
+        mlocate
+        pastebinit
+        tree
+        xterm
+        zenity
+        )
+    sudo pacman -S --needed ${array[@]}; sync
+}
+
+function download_managers() {
+    # Download & sync managers
+    message="2. Installing Download & sync managers..."
+    clear; echo -e "$message"; sleep 3
+    array=(
+        axel
+        bzr
+        curl
+        deluge
+        git
+        rsync
+        zsync
+        )
+    sudo pacman -S --needed ${array[@]}; sync
+}
+
+function codecs() {
+    # Media codecs & compression algorithms
+    message="3. Installing media codecs & compression algorithms..."
+    clear; echo -e "$message"; sleep 3
+    array=(
+        flashplugin
+
+        ffmpeg
+        ffmpegthumbnailer
+        ffmpegthumbs
+
+        gstreamer0.10-plugins
+        gst-plugins-base
+        gst-plugins-good
+        gst-plugins-bad
+        gst-plugins-ugly
+
+        icedtea-web
+        jre8-openjdk
+        jre8-openjdk-headless
+
+        bzip2
+        gzip
+        lrzip
+        lz4
+        lzo
+        p7zip
+        zlib
+        unrar
+        file-roller
+        )
+    sudo pacman -S --needed ${array[@]}; sync
+}
+
+function editors() {
+    # Editors
+    message="4. Installing editors & IDEs..."
+    clear; echo -e "$message"; sleep 3
+    array=(
+        nano
+        vim
+        vim-jedi
+
+        medit
+        mousepad
+        pluma
+
+        bluefish
+        geany
+        geany-plugins
+
+        tk
+        meld
+        poedit
+        translate-toolkit
+        )
+    sudo pacman -S --needed ${array[@]}; sync
+}
+
+function info_n_recovery() {
+    # Sys_info, recovery etc.
+    message="5. Installing System_info, recovery tools etc..."
+    clear; echo -e "$message"; sleep 3
+    array=(
+        btrfs-progs
+        foremost
+        ddrescue
+        gparted
+        gsmartcontrol
+        hddtemp
+        htop
+        iotop
+        lm_sensors
+        lshw
+        lsof
+        lsscsi
+        mc
+        testdisk
+        )
+    sudo pacman -S --needed ${array[@]}; sync
+    # enable sensors
+    sudo sensors-detect --auto
+    # yes | sudo sensors-detect # -old command
+}
+
+function main() {
+    # Main function
+    essential_utilities
+    download_managers
+    codecs
+    editors
+    info_n_recovery
+}
+
+main "$@"
