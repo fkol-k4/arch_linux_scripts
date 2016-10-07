@@ -6,20 +6,61 @@ arch_linux_scrpits
 This set of files and scripts is for managing and updating an Arch Linux installation, **installed inside a subvolume of a BTRFS partition**.
 This type of installation provides an easy way to always have a complete backup of our installed system, so that it is very easy to restore the system to a previous state if something goes wrong.
 
-In case that the system is dual (*or even multi*)-booted (such as in my case), the updates script also provides an easy way to transfer a GRUB2 entry to every other distribution of the computer (inside its **/etc/grub.d/** directory).
+---
 
-This is useful due to a bug in GRUB2's os-prober subsystem that fails to detect a Linux installation installed inside a BTRFS subvolume.
+#### Arch Linux installation guide
 
-**_WARNING:_**
-**This repository contains not only the update and subvolume handling script, but also various other things that i use, such as other scripts, custom dotfiles etc.**
-If you don't need all these and just want the update and subvolume handling script, then all you have to copy from this repository to your system are the following files: 
+- **Edit Live CD boot options\***
+**\***++*Disabling IPv6 is not always needed.
+Check if your system works as intended with IPv6 enabled before you disable it.*++
+Add `ipv6.disable=1` before booting
+to disable IPv6 on the kernel
 
-    usr/local/bin/custom/custom_arch-updates
-    usr/share/applications/custom/custom_arch-updates.desktop
-    usr/share/icons/custom/arch-square.svg
+- **Disable IPv6 in dhcp\***
+**\***++*Disabling IPv6 is not always needed.
+Check if your system works as intended with IPv6 enabled before you disable it.*++
+`# echo 'noipv6rs' >> /etc/dhcpcd.conf`
+or
+`sudo nano /etc/dhcpcd.conf`
+and add `noipv6rs` to its end
+to disable IPv6 in the dhcp daemon.
 
-_Make sure that the_ **usr/local/bin/custom/custom_arch-updates** _and_ **usr/share/applications/custom/custom_arch-updates.desktop** _files are made executable and keep the same path scheme so that the update scrpit can be launched via its launcher_
+- **Test if you are booted in EFI mode**
+`# efivar -l`
+If there is output, then the LiveCD has booted in EFI mode.
 
-#####TODO:
-* Use systemd service file for auto-transferring GRUB2 entry.
-* Maybe create an 'install.sh' installer.
+- **Set mirrorlist**
+`# nano /etc/pacman.d/mirrorlist`
+
+- **Update repos (optional)**
+`# pacman -Syy` (update repo info) **++or++**
+`# pacman -Syyvu` (update packages too).
+
+- **Mount install partitions**
+`# mount -o discard,ssd,compress=lzo,subvol-$subvolume /dev/sdxy /mnt`
+if in EFI mode:
+`# mkdir -p /mnt/boot/efi`
+`# mount -t vfat /dev/sdxz /mnt/boot/efi`
+if we want separate '/home' partition:
+`# mount /dev/sdxv /mnt/home`
+
+- **Install the base system**
+`# pacstrap -i /mnt base base-devel xorg`
+
+- **Generate fstab file**
+`# genfstab -U -p /mnt >> /mnt/etc/fstab`
+and edit it with
+`# nano /mnt/etc/fstab`
+
+- **Chroot into the mounted system**
+`# arch-chroot /mnt /bin/bash`
+
+- **Download install scripts**
+`# cd /root`
+`# git clone https://github.com/fkol-k4/fkol-k4.archlinux.extras.git`
+If neede, install 'git' first with
+`# pacman -S --needed git`
+
+- **Run secondary install script**
+`# . path/to/file`
+
