@@ -11,13 +11,13 @@ This type of installation provides an easy way to always have a complete backup 
 #### Arch Linux installation guide
 
 - **Edit Live CD boot options\***
-**\***++*Disabling IPv6 is not always needed.
+++*Disabling IPv6 is not always needed.
 Check if your system works as intended with IPv6 enabled before you disable it.*++
 Add `ipv6.disable=1` before booting
 to disable IPv6 on the kernel
 
 - **Disable IPv6 in dhcp\***
-**\***++*Disabling IPv6 is not always needed.
+++*Disabling IPv6 is not always needed.
 Check if your system works as intended with IPv6 enabled before you disable it.*++
 `# echo 'noipv6rs' >> /etc/dhcpcd.conf`
 or
