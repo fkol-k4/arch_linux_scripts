@@ -103,6 +103,7 @@ function office() {
     message='5. Installing Office-related packages...'
     clear; echo -e "$message"; sleep 3
     array=(
+        librecad
         libreoffice
         seahorse
         cups

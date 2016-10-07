@@ -1,0 +1,113 @@
+#!/bin/bash
+
+#   file: fkol-k4.30.DE.antergos.cinnamon
+#   type: Bash script
+#   Purpose: Installs Cinnamon-related packages
+
+#   Copyright (C) 2016  fkol k4, "fkolyvas at gmail dot com"
+
+#   This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+
+#   You should have received a copy of the GNU General Public License along
+#   with this program; if not, write to the Free Software Foundation, Inc.,
+#   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+function check_for_cinnamon() {
+	# Checking if we are running Cinnamon desktop, exit if not.
+	message="Sorry, this session is not Cinnamon. Exiting..."
+	if [[ $DESKTOP_SESSION != "cinnamon" ]] ; then
+		clear; echo "$message"; sleep 4; exit 0
+	fi
+}
+
+function cinnamon_repos() {
+	# install packages for Cinnamon from repos
+	message="Installing packages for Cinnamon from repos..."
+	clear; echo "$message": sleep 4
+	array=(
+		`pacman -Ss cinnamon | grep -e 'antergos/' | awk '$0 {print $1}'`
+		elementary-icon-theme
+		plank
+		plank-config
+		`pacman -Ss dmz | grep xcursor | awk '$0 {print $1}'`
+		gnome-icon-theme-extras
+		gnome-icon-theme-symbolic
+		gconf-editor
+		dconf-editor
+		gtk-theme-adapta
+		gtk-theme-arc
+		gtk-theme-paper
+		numix-frost-themes
+		gtk-engines
+		gtk2_prefs
+		lxappearance-gtk3
+		gtk-recordmydesktop
+		soundconverter
+		)
+	sudo pacman -S --needed ${array[@]}; sync
+	# autostart plank dock
+	src="/usr/share/applications/plank.desktop"
+	dst="$HOME/.config/autostart/"
+	ln -sf "$src" "$dst"
+}
+
+function cinnamon_AUR() {
+	# install packages for Cinnamon from AUR
+	message="Installing packages for Cinnamon from AUR..."
+	clear; echo "$message": sleep 4
+	array=(
+		menulibre
+		mintlocale
+		mint-x-icons
+		mint-x-theme
+		mint-cinnamon-themes
+		mint-y-theme-git
+		mint-y-icons-git
+		xubuntu-artwork
+		)
+    pacaur --sync --needed --noedit ${array_aur[@]}; sync
+}
+
+function chars_indicator() {
+	# UTF-8 characters indicator
+	message="Installing packages for Cinnamon from AUR..."
+	clear; echo "$message": sleep 4
+	cd /opt/
+    if [[ -d "/opt/indicator-chars" ]]; then
+        sudo chown -R "$USER" "/opt/indicator-chars/"
+        cd /opt/indicator-chars/
+        git pull
+    else
+        sudo git clone git://github.com/tobyS/indicator-chars.git
+        sudo chown -R "$USER" "/opt/indicator-chars/"
+    fi
+    cd $HOME
+	#   Set to autostart
+	src="$HOME/.local/share/applications/org.fkol-k4.chars-indicator.desktop"
+	dst="$HOME/.config/autostart/"
+	ln -sf "$src" "$dst"
+	sync
+}
+
+function main() {
+	# main function
+	message="Running script 'fkol-k4.30.DE.antergos.cinnamon'. Please wait..."
+	clear; echo "$message"; sleep 4
+	check_for_cinnamon
+	cinnamon_repos
+	cinnamon_AUR
+	chars_indicator
+	sync
+}
+
+main "$@"
+
+}

@@ -1,0 +1,118 @@
+#!/bin/bash
+
+#   file: fkol-k4.30.DE.xfce4
+#   type: Bash script
+#   Purpose: Installs GNOME related packages
+
+#   Copyright (C) 2016  fkol k4, "fkolyvas at gmail dot com"
+
+#   This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+
+#   You should have received a copy of the GNU General Public License along
+#   with this program; if not, write to the Free Software Foundation, Inc.,
+#   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+
+function repos() {
+    message='1. Installing additional stuff for XFCE4 DE from repos...'
+    clear; echo -e "$message"; sleep 3
+    # Installing LXDE enhancements
+    array=(
+        archlinux-menus
+        xdg-user-dirs
+        xdg-user-dirs-gtk
+        xdg-utils
+        archlinux-xdg-menu
+    
+        xfce4
+        xfce4-goodies
+        
+
+        gconf-editor
+        dconf-editor
+    
+        menumaker
+        obconf
+
+        plank
+        plank-config
+    
+        gtk-engines
+        gtk-engine-aurora
+        gtk-engine-murrine
+        gtk-xfce-engine
+        gtk2_prefs
+        
+        elementary-icon-theme
+        faenza-icon-theme
+        faience-icon-theme
+
+        gnome-icon-theme
+        gnome-icon-theme-extras
+        gnome-icon-theme-symbolic
+        gtk-update-icon-cache
+        
+        galculator-gtk2
+        )
+    sudo pacman -S --needed ${array[@]}; sync
+}
+
+function aur() {
+    message='2. Installing additional stuff for LXDE DE from AUR...'
+    clear; echo -e "$message"; sleep 3
+    # Installing LXDE enhancements
+    array=(
+        xfce4-pulseaudio-plugin
+        xfce-theme-greybird
+        numix-themes-archblue-git
+        elementary-xfce-icons
+        xfce4-volumed
+        xfce-theme-manager
+        gnome-icon-theme-xfce
+        ambiance-radiance-colors-suite
+        xubuntu-artwork
+        )
+    pacaur --sync --needed --noedit ${array[@]}; sync
+}
+
+function chars_indicator() {
+    message='3. Installing additional UTF-8 characters indicator...'
+    clear; echo -e "$message"; sleep 3
+    # UTF-8 characters indicator
+    cd /opt/
+        if [ -d /opt/indicator-chars ]; then
+            sudo chown -R $USER /opt/indicator-chars/
+            cd /opt/indicator-chars/
+            git pull
+        else
+            sudo git clone git://github.com/tobyS/indicator-chars.git
+            sudo chown -R $USER /opt/indicator-chars/
+        fi
+        cd $HOME
+    # Set to autostart
+    mkdir -p $USER/.config/autostart
+    launcher_src="$HOME/.local/share/applications/org.fkol-k4.chars-indicator.desktop"
+    launcher_dest="$USER/.config/autostart/$USER/.config/autostart/"
+    ln -sf "$launcher_src" "$launcher_dest"
+    sync
+}
+
+function main() {
+    message='00. Running file "fkol-k4.30.DE.xfce4"...'
+    clear; echo -e "$message"; sleep 3
+    # main function. Run all functions above.
+    repos
+    aur
+    chars_indicator
+    sync
+}
+
+main "$@"
