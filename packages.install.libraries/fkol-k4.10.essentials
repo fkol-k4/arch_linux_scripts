@@ -42,7 +42,7 @@ function essential_utilities() {
         xterm
         zenity
         )
-    sudo pacman -S --needed ${array[@]}; sync
+    sudo pacman -S --needed --color always ${array[@]}; sync
 }
 
 function download_managers() {
@@ -58,7 +58,7 @@ function download_managers() {
         rsync
         zsync
         )
-    sudo pacman -S --needed ${array[@]}; sync
+    sudo pacman -S --needed --color always ${array[@]}; sync
 }
 
 function codecs() {
@@ -86,13 +86,18 @@ function codecs() {
         gzip
         lrzip
         lz4
+        lzip
         lzo
+        lzop
         p7zip
-        zlib
         unrar
+        unzip
+        xz
+        zip
+        zlib
         file-roller
         )
-    sudo pacman -S --needed ${array[@]}; sync
+    sudo pacman -S --needed --color always ${array[@]}; sync
 }
 
 function editors() {
@@ -117,7 +122,7 @@ function editors() {
         poedit
         translate-toolkit
         )
-    sudo pacman -S --needed ${array[@]}; sync
+    sudo pacman -S --needed --color always ${array[@]}; sync
 }
 
 function info_n_recovery() {
@@ -140,7 +145,7 @@ function info_n_recovery() {
         mc
         testdisk
         )
-    sudo pacman -S --needed ${array[@]}; sync
+    sudo pacman -S --needed --color always ${array[@]}; sync
     # enable sensors
     sudo sensors-detect --auto
     # yes | sudo sensors-detect # -old command

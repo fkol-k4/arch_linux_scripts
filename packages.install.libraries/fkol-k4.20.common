@@ -29,14 +29,14 @@ function markdown_editors () {
         haroopad
         remarkable
         )
-    pacaur --sync --needed --noedit ${array[@]}; sync
+    pacaur --sync --needed --color always --noedit ${array[@]}; sync
 }
 
 function megasync_client() {
     # install MEGA sync client
     message='2. Installing MEGA sync client (AUR only)...'
     clear; echo -e "$message"; sleep 3
-    pacaur --sync --needed --noedit megasync
+    pacaur --sync --needed --color always --noedit megasync
 }
 
 function web_related() {
@@ -52,13 +52,13 @@ function web_related() {
         pidgin
         wireshark-gtk
         )
-    sudo pacman -S --needed ${array_repos[@]}; sync
+    sudo pacman -S --needed --color always ${array_repos[@]}; sync
     # AUR
     array_aur=(
         google-chrome
         google-talkplugin
         )
-    pacaur --sync --needed --noedit ${array_aur[@]}; sync
+    pacaur --sync --needed --color always --noedit ${array_aur[@]}; sync
 }
 
 function media_packages() {
@@ -89,13 +89,13 @@ function media_packages() {
         kdenlive
         handbrake
         )
-    sudo apt-get --yes install ${array[@]}; sync
+    sudo pacman -S --needed --color always ${array_repos[@]}; sync
     # AUR packages
     array_aur=(
         gimp-plugin-texturize
         gimp-plugin-registry
         )
-    pacaur --sync --needed --noedit ${array_aur[@]}; sync
+    pacaur --sync --needed --color always --noedit ${array_aur[@]}; sync
 }
 
 function office() {
@@ -117,19 +117,29 @@ function office() {
         aspell-en
         aspell-fr
         catfish
-        `pacman -Ss font | sort | grep ttf | awk '$0 {print $1}'`
-        `pacman -Ss font | grep adobe- | awk '$0 {print $1}'`
         noto-fonts
         fontforge
         gucharmap
         brasero
         )
-    sudo pacman -S --needed ${array[@]}; sync
+    sudo pacman -S --needed --color always ${array[@]}; sync
+}
+
+
+function fonts() {
+    # install office-related stuff
+    message='5. Installing Office-related packages...'
+    clear; echo -e "$message"; sleep 3
+    array=(
+        `pacman -Ss font | sort | grep ttf | awk '$0 {print $1}'`
+        `pacman -Ss font | grep adobe- | awk '$0 {print $1}'`
+        )
+    sudo pacman -S --needed --color always ${array[@]}; sync
     #   Local windows fonts
-    font_source="$HOME/Public/Windows_Fonts_Collection"
-    font_dest="/usr/share/fonts/windows_fonts"
-    if [[ -d "$font_source" ]]; then
-        sudo cp -r "$font_source" "$font_dest"; sync
+    font_src="$HOME/Public/Windows_Fonts_Collection"
+    font_dst="/usr/share/fonts/windows_fonts"
+    if [[ -d "$font_src" ]] && [[ ! -d "$font_dst" ]]; then
+        sudo cp -r "$font_src" "$font_dst"; sync
         sudo fc-cache -fv
     fi
 }
@@ -143,8 +153,8 @@ function main() {
     web_related
     media_packages
     office
+    fonts
     sync
 }
 
 main "$@"
-exit 0

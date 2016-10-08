@@ -62,7 +62,7 @@ function repos() {
         
         galculator-gtk2
         )
-    sudo pacman -S --needed ${array[@]}; sync
+    sudo pacman -S --needed --color always ${array[@]}; sync
 }
 
 function aur() {
@@ -80,7 +80,7 @@ function aur() {
         ambiance-radiance-colors-suite
         xubuntu-artwork
         )
-    pacaur --sync --needed --noedit ${array[@]}; sync
+    pacaur --sync --needed --color always --noedit ${array[@]}; sync
 }
 
 function chars_indicator() {

@@ -21,89 +21,99 @@
 #   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 
+function check_for_gnome() {
+	# Checking if we are running GNOME desktop, exit if not.
+	message="Sorry, this session is not GNOME. Exiting..."
+	if [[ $DESKTOP_SESSION != "gnome" ]] ; then
+		clear; echo "$message"; sleep 4; exit 0
+	fi
+}
 
+function gnome_repos() {
+    # message user
+	message="Installing GNOME packages from repos..."
+	clear; echo "$message": sleep 4
+	# install packages for GNOME from repos
+	array=(
+        alacarte
+        eog-plugins
+        gnome-alsamixer
+        gnome-bluetooth
+        gnome-icon-theme
+        gnome-icon-theme-extras
+        gnome-icon-theme-symbolic
+        gnome-menus
+        gnome-mplayer
+        gecko-mediaplayer
+        gnome-commander
+        polkit-gnome
+        gedit-plugins
+        nautilus-open-terminal
+        seahorse-nautilus
+        nautilus-actions
+        xcursor-vanilla-dmz
+        xcursor-vanilla-dmz-aa
+        elementary-icon-theme
+        )
+        pacman -S --needed --color always ${array[@]}; sync
+}
 
-#   Unity DE
-nautilus-megasync # AUR
-seahorse-nautilus
+function gnome_aur() {
+    # message user
+	message="Installing GNOME packages from AUR..."
+	clear; echo "$message": sleep 4
+	# install packages for GNOME from AUR
+	array=(
+        numix-themes-archblue-git
+        adwaita-qt4
+        adwaita-qt5
+        gnome-session-properties
+        numix-themes-electric
+        numix-themes-green
+        nautilus-megasync
+        nautilus-renamer
+        xcursor-archcursorblue
+        xcursor-human
+        xcursor-osx-elcap
+        gtk-theme-elementary-bzr
+        elementary-cursors-git
+        gnome-shell-theme-elementary-mod
+        )
+        pacaur --sync --needed --color always --noedit ${array[@]}; sync
+}
 
+function chars_indicator() {
+    message='3. Installing additional UTF-8 characters indicator...'
+    clear; echo -e "$message"; sleep 3
+    # UTF-8 characters indicator
+    cd /opt/
+        if [ -d /opt/indicator-chars ]; then
+            sudo chown -R $USER /opt/indicator-chars/
+            cd /opt/indicator-chars/
+            git pull
+        else
+            sudo git clone git://github.com/tobyS/indicator-chars.git
+            sudo chown -R $USER /opt/indicator-chars/
+        fi
+        cd $HOME
+    # Set to autostart
+    mkdir -p $USER/.config/autostart
+    launcher_src="$HOME/.local/share/applications/org.fkol-k4.chars-indicator.desktop"
+    launcher_dest="$USER/.config/autostart/$USER/.config/autostart/"
+    ln -sf "$launcher_src" "$launcher_dest"
+    sync
+}
 
-array=(
-    compizconfig-settings-manager
-    dconf-editor
-    dconf-tools
-    gconf-editor
-    
-    dmz-cursor-theme
-    gnome-extra-icons
-    gnome-icon-theme-*
-    
-    gtk2-engines
-    gtk2-engines-*
-    gtk3-engines-*
-    gtk-theme-config
-    
-    menulibre 
-    
-    nautilus-actions
-    nautilus-emblems
-    nautilus-filename-repairer
-    nautilus-gtkhash
-    nautilus-image-manipulator
-    nautilus-open-terminal
-    nautilus-script-manager
-    nautilus-scripts-manager
-    nautilus-sendto
-    
-    qt4-qtconfig
-    suru-icon-theme
-    unity-tweak-tool
-    
-    recordmydesktop
-    gtk-recordmydesktop
-    soundconverter
-    )
-sudo apt-get --yes install ${array[@]}; sync
+function main() {
+    # message
+    message="Running script 'fkol-k4.30.DE.gnome'. Please wait..."
+	clear; echo "$message"; sleep 4
+    # main function
+    check_for_gnome
+    gnome_repos
+    gnome_aur
+    chars_indicator
+    sync
+}
 
-
-#   UTF-8 characters indicator
-#   ────────────────────────────────────────────────────────────────────────
-cd /opt/
-    if [ -d /opt/indicator-chars ]; then
-        sudo chown -R $USER /opt/indicator-chars/
-        cd /opt/indicator-chars/
-        git pull
-    else
-        sudo git clone git://github.com/tobyS/indicator-chars.git
-        sudo chown -R $USER /opt/indicator-chars/
-    fi
-    cd $HOME
-#   Set to autostart
-mkdir -p $USER/.config/autostart
-cp $USER/.local/share/applications/indicator-sensors.desktop $USER/.config/autostart/
-
-
-
-#   Generic Unity settings
-#   ────────────────────────────────────────────────────────────────────────
-#   unhide xdg autostart services
-if [ -d /etc/xdg/autostart ]; then
-    sudo sed -i 's/NoDisplay=true/NoDisplay=false/g' /etc/xdg/autostart/*.desktop
-fi
-if [ -d /usr/share/gnome/autostart ]; then
-    sudo sed -i 's/NoDisplay=true/NoDisplay=false/g' /usr/share/gnome/autostart/*.desktop
-fi
-#  gsettings as user
-gsettings set org.gnome.nautilus.preferences always-use-location-entry true
-gsettings set org.gtk.Settings.FileChooser sort-directories-first true
-#  gsettings as root
-sudo su root -c 'gsettings set org.gnome.nautilus.preferences always-use-location-entry true'
-sudo su root -c 'gsettings set org.gtk.Settings.FileChooser sort-directories-first true'
-
-
-#   sync I/O
-sync
-
-
-##  EXIT LIBRARY
-exit
+main"$@"

@@ -64,7 +64,7 @@ function lxde_repos() {
         
         galculator-gtk2
         )
-    sudo pacman -S --needed ${array[@]}; sync
+    sudo pacman -S --needed --color always ${array[@]}; sync
 }
 
 function lxde_aur() {
@@ -87,7 +87,7 @@ function lxde_aur() {
         numix-themes-archblue-git
         numix-frost-themes
         )
-    pacaur --sync --needed --noedit ${array_aur[@]}; sync
+    pacaur --sync --needed --color always --noedit ${array[@]}; sync
 }
 
 function chars_indicator() {
@@ -123,4 +123,3 @@ function main() {
 }
 
 main "$@"
-exit 0

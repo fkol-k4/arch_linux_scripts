@@ -20,6 +20,7 @@
 #   with this program; if not, write to the Free Software Foundation, Inc.,
 #   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+
 function check_for_cinnamon() {
 	# Checking if we are running Cinnamon desktop, exit if not.
 	message="Sorry, this session is not Cinnamon. Exiting..."
@@ -52,7 +53,7 @@ function cinnamon_repos() {
 		gtk-recordmydesktop
 		soundconverter
 		)
-	sudo pacman -S --needed ${array[@]}; sync
+	sudo pacman -S --needed --color always ${array[@]}; sync
 	# autostart plank dock
 	src="/usr/share/applications/plank.desktop"
 	dst="$HOME/.config/autostart/"
@@ -73,7 +74,7 @@ function cinnamon_AUR() {
 		mint-y-icons-git
 		xubuntu-artwork
 		)
-    pacaur --sync --needed --noedit ${array_aur[@]}; sync
+    pacaur --sync --needed --color always --noedit ${array[@]}; sync
 }
 
 function chars_indicator() {
@@ -109,5 +110,3 @@ function main() {
 }
 
 main "$@"
-
-}
