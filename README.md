@@ -25,7 +25,7 @@ to disable IPv6 on the kernel
 
 or
 
-`sudo nano /etc/dhcpcd.conf`
+`# nano /etc/dhcpcd.conf`
 
 and add `noipv6rs` to its end to disable IPv6 in the dhcp daemon.
 
@@ -59,7 +59,7 @@ if we want separate '/home' partition:
 
 `# mount /dev/sdxv /mnt/home`
 
-####Install the base system
+####Install the base system (-i => interactive, you can skip it if you want)
 
 `# pacstrap -i /mnt base base-devel xorg`
 
@@ -88,4 +88,3 @@ If needed, install 'git' first with
 ####Run secondary install script
 
 `# . path/to/file`
-
