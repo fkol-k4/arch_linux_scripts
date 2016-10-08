@@ -1,0 +1,492 @@
+#!/bin/bash
+
+#   file: /path/to/fkol-k4.bash.script
+#   type: Bash script
+#   action:
+
+#   Copyright (C) <year>  fkol k4, "fkolyvas at gmail dot com".
+
+#   This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+
+#   You should have received a copy of the GNU General Public License along
+#   with this program; if not, write to the Free Software Foundation, Inc.,
+#   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+
+function disable_ipv6() {
+    # disabling IPv6 from dhcp daemon
+    echo "noipv6rs" >> /etc/dhcpcd.conf
+    nano /etc/dhcpcd.conf
+    # update repo info
+    pacman -Syyv
+}
+
+function set_locales() {
+    # enable Greek & English (US) on system locales
+    sed -i 's/#en_US.UTF-8/en_US.UTF-8/g' /etc/locale.gen
+    sed -i 's/#el_GR.UTF-8/el_GR.UTF-8/g' /etc/locale.gen
+    # generate locales
+    locale-gen
+    # set locales to American English
+    echo 'LANG=en_US.UTF-8' > /etc/locale.conf
+    export LANG=en_US.UTF-8
+    locale > /etc/locale.conf
+}
+
+function set_timezone() {
+    # set system timezone
+    ln -sf /usr/share/zoneinfo/Europe/Athens /etc/localtime
+    # set hardware clock to UTC
+    hwclock --systohc --utc
+}
+
+function enable_dhcpcd() {
+    # enable dhcpcd on systemd
+    systemctl enable dhcpcd
+    systemctl enable dhcpcd.service
+}
+
+function set_hostname() {
+    # set computer hostname
+    clear
+    echo "Please, enter your desired computer name (Hostname)."; echo
+    echo "Only letters and dashes without spaces are allowed."
+    echo "The name *must* start and end with a letter... "; echo
+    read -p "Hostname: " hostname_given
+    echo; echo -e "Ok, your Hostname now is $hostname_given"
+    echo "You can edit this by editing the '/etc/apt/hostname' file."
+    echo $hostname_given > /etc/hostname
+}
+
+function create_initramfs() {
+    # install some needed packages first
+    message="Installing Btrfs tools and basic compression algorithms..."
+    clear; echo "$message"; sleep 4
+    array=(
+        btrfs-progs
+        bzip2
+        gzip
+        lrzip
+        lz4
+        lzip
+        lzo
+        lzop
+        p7zip
+        unrar
+        unzip
+        xz
+        zip
+        zlib
+        )
+    pacman -S --needed ${array[@]}; sync
+    # create intramfs
+    clear
+    echo "You have to select initramfs compression mode."; echo
+    echo "To select lz4 (ext4 recommended), type 'lz4' (without the quotes) on the prompt below."
+    echo "Otherwise, 'cat' (uncompressed mode - btrfs recommended) will be selected by default."
+    echo
+    read -p "Compression mode (Default=cat): " compression_mode
+    if [[ "$compression_mode" == "lz4" ]]; then
+        # set lz4 compression
+        pacman -S --needed lz4
+        sed -i 's/#COMPRESSION="lz4"/COMPRESSION="lz4"/g' /etc/mkinitcpio.conf
+        mkinitcpio -p linux
+    else
+        # set Uncompressed mode (cat)
+        sed -i 's/#COMPRESSION="lz4"/#COMPRESSION="lz4"\nCOMPRESSION="cat"/' /etc/mkinitcpio.conf
+        mkinitcpio -p linux
+    fi
+}
+
+function root_passwd() {
+    clear
+    echo "Please, enter a password for the Root user onth the prompt below:"
+    echo
+    passwd
+}
+
+function bootloader_efi() {
+    # install some needed packages first
+    message="Installing some needed packages..."
+    clear; echo "$message"; sleep 4
+    pacman -S --needed grub efibootmgr
+    # install bootloader to the disk
+    clear
+    echo 'You have to select a disk to install GRUB2 Bootloader.'
+    echo
+    echo 'Reference:'
+    echo '/dev/sda = your first hard drive.'
+    echo '/dev/sdb = your second hard drive (if there is one), etc...'
+    echo
+    echo 'You can also install GRUB2 to a specific partition, although it is **not** recommended.'
+    echo
+    echo 'Reference:'
+    echo '/dev/sda1 = first partition of your first hard drive'
+    echo '/dev/asb3 = third partition of your second hard drive (if there is one), etc...'
+    echo
+    echo 'Just type the part after /dev/.'
+    echo 'Example:'
+    echo 'type " sda " to select /dev/sda'
+    echo 'type " sda2 " to select /dev/sda2'; echo
+    read -p "Install GRUB2 to: " grub_target
+    grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=arch --boot-directory=/boot --recheck /dev/"$grub_target"
+    # disable some grub settings
+    sed -i 's/GRUB_TIMEOUT/#GRUB_TIMEOUT/g' /etc/default/grub
+    sed -i 's/GRUB_CMDLINE_LINUX=""/#GRUB_CMDLINE_LINUX=""/g' /etc/default/grub
+    sed -i 's/GRUB_GFXMODE/#GRUB_GFXMODE/g' /etc/default/grub
+    sed -i 's/GRUB_GFXPAYLOAD_LINUX/#GRUB_GFXPAYLOAD_LINUX/g' /etc/default/grub
+    # add some more grub settings
+    echo
+    echo '## Added by fkol k4 after the installation for GRUB2 setting:' >> /etc/default/grub
+    echo 'GRUB_TIMEOUT=15' >> /etc/default/grub
+    echo 'GRUB_CMDLINE_LINUX="ipv6.disable=1 elevator=cfq i915.enable_psr=01"' >> /etc/default/grub
+    echo 'GRUB_GFXMODE=auto' >> /etc/default/grub
+    echo 'GRUB_GFXPAYLOAD_LINUX=keep' >> /etc/default/grub
+    # update grub
+    grub-mkconfig -o /boot/grub/grub.cfg
+}
+
+function bootloader_bios() {
+    # install some needed packages first
+    message="Installing some needed packages..."
+    clear; echo "$message"; sleep 4
+    pacman -S --needed grub
+    # install bootloader to the disk
+    clear
+    echo 'You have to select a disk to install GRUB2 Bootloader.'
+    echo
+    echo 'Reference:'
+    echo '/dev/sda = your first hard drive.'
+    echo '/dev/sdb = your second hard drive (if there is one), etc...'
+    echo
+    echo 'You can also install GRUB2 to a specific partition, although it is **not** recommended.'
+    echo
+    echo 'Reference:'
+    echo '/dev/sda1 = first partition of your first hard drive'
+    echo '/dev/asb3 = third partition of your second hard drive (if there is one), etc...'
+    echo
+    echo 'Just type the part after /dev/.'
+    echo 'Example:'
+    echo 'type " sda " to select /dev/sda'
+    echo 'type " sda2 " to select /dev/sda2'; echo
+    read -p "Install GRUB2 to: " grub_target
+    grub-install --target=i386-pc --recheck /dev/"$grub_target"
+    # disable some grub settings
+    sed -i 's/GRUB_TIMEOUT/#GRUB_TIMEOUT/g' /etc/default/grub
+    sed -i 's/GRUB_CMDLINE_LINUX=""/#GRUB_CMDLINE_LINUX=""/g' /etc/default/grub
+    sed -i 's/GRUB_GFXMODE/#GRUB_GFXMODE/g' /etc/default/grub
+    sed -i 's/GRUB_GFXPAYLOAD_LINUX/#GRUB_GFXPAYLOAD_LINUX/g' /etc/default/grub
+    # add some more grub settings
+    echo
+    echo '## Added by fkol k4 after the installation for GRUB2 setting:' >> /etc/default/grub
+    echo 'GRUB_TIMEOUT=15' >> /etc/default/grub
+    echo 'GRUB_CMDLINE_LINUX="ipv6.disable=1 elevator=cfq i915.enable_psr=01"' >> /etc/default/grub
+    echo 'GRUB_GFXMODE=auto' >> /etc/default/grub
+    echo 'GRUB_GFXPAYLOAD_LINUX=keep' >> /etc/default/grub
+    # update grub
+    grub-mkconfig -o /boot/grub/grub.cfg
+}
+
+function bootloader_select() {
+    # select UEFI or BIOS bootloader
+    clear; echo -e "    Is this an EFI or BIOS type installation?
+
+    This important to know for the Bootloader installation.
+    If this is an EFI type installation, please type ' efi ' at the prompt below.
+
+    Otherwise, BIOS mode (default) will be selected."; echo
+    read -p "Installation type: " inst_type
+    # run bootloader install function according to selection
+    if [[ "$inst_type" == "efi" ]]; then
+        bootloader_efi
+    else
+        bootloader_bios
+    fi
+}
+
+function create_user() {
+    # install some needed packages first
+    message="Installing some needed packages..."
+    clear; echo "$message"; sleep 4
+    pacman -S --needed base-devel sudo
+    sed -i 's/# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/g' /etc/sudoers
+    # create user
+    clear
+    echo -e "We now have to create your user. You must provide a username."
+    read -p "Enter your username: " user_name
+    useradd -m -G wheel -s /bin/bash $user_name
+    gpasswd -a $user_name sudo
+    echo
+    echo -e "Now we need a password for user $user_name ..."
+    echo
+    echo -e "Please enter a password on the prompt below."
+    passwd $user_name
+    echo; echo
+    echo -e "Do you also want to set the NOPASSWD option for $user_name on the"
+    echo -e "/etc/sudoers file?"
+    
+    echo -e "Please note that this is a security risk."
+    read -p "[Default=No, or just answer < y >] " nopasswd_answer
+    if [[ "$nopasswd_answer" = "y" ]]; then
+        echo -e "$user_name ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers; echo
+        echo -e "Ok, now $user_name has NOPASSWD acces to sudo."; sleep 3
+    else
+        echo -e "Wise decision, skipping this..."; sleep 3
+    fi
+}
+
+function x_server() {
+    # install X display server & tools
+    message="Installing X display server..."
+    clear; echo "$message"; sleep 4
+    array=(
+        xorg
+        xorg-apps
+        xorg-drivers
+        xorg-fonts
+        xorg-font-utils
+        xorg-fonts-alias
+        xorg-fonts-misc
+        xorg-server-utils
+        xorg-utils
+        xorg-xedit
+        xorg-xkb-utils
+        )
+    pacman -S --needed ${array[@]}; sync
+}
+
+function sound_subsystem() {
+    # sound tools
+    message="Installing sound subsystem..."
+    clear; echo "$message"; sleep 4
+    array=(
+        alsa-firmware
+        alsa-lib
+        alsa-plugins
+        alsa-tools
+        alsa-utils
+        gnome-alsamixer
+        pulseaudio
+        pulseaudio-alsa
+        pavucontrol
+        pulseaudio-equalizer
+        pulseaudio-gconf
+        pamixer
+        )
+    pacman -S --needed ${array[@]}; sync
+}
+        
+function ttf_fonts() {
+    # install ttf fonts
+    message="Installing ttf fonts..."
+    clear; echo "$message"; sleep 4
+    array=(
+        noto-fonts
+        `pacman -Ss font | sort | grep ttf | awk '$0 {print $1}'`
+        `pacman -Ss font | grep adobe- | awk '$0 {print $1}'`
+        fontconfig
+        freetype2
+        )
+    pacman -S --needed ${array[@]}; sync
+}
+
+function install_gnome() {
+    # message
+    message="Ok, you chose GNOME Desktop Environment..."
+    clear; echo "$message"; sleep 4
+    # install GNOME Desktop Environment
+    array=(
+        gnome
+        gnome-extra
+        gksu
+        alacarte
+        eog-plugins
+        gnome-alsamixer
+        gnome-bluetooth
+        gnome-icon-theme
+        gnome-icon-theme-extras
+        gnome-icon-theme-symbolic
+        polkit-gnome
+        nautilus-open-terminal
+        seahorse-nautilus
+        plank
+        )
+    pacman -S --needed ${array[@]}; sync
+    # enable gdm 
+    systemctl enable gdm
+    systemctl enable gdm.service
+}
+
+function install_xfce4() {
+    # message
+    message="Ok, you chose XFCE4 Desktop Environment..."
+    clear; echo "$message"; sleep 4
+    # install XFCE4 desktop environment
+    array=(
+        xfce4
+        xfce4-goodies
+        gksu
+        lightdm
+        lightdm-gtk-greeter
+        lightdm-gtk-greeter-settings
+        light-locker
+        polkit-gnome
+        plank
+        )
+    pacman -S --needed ${array[@]}; sync
+    # enable LightDM
+    systemctl enable lightdm.service
+    # create 'autologin' group
+    groupadd -r autologin
+    # add user to 'autologin' group
+    gpasswd -a `ls /home` autologin
+}
+
+function install_mate() {
+    # message
+    message="Ok, you chose MATE Desktop Environment..."
+    clear; echo "$message"; sleep 4
+    # install MATE desktop environment
+    array=(
+        mate
+        mate-extra
+        gksu
+        libmatekbd
+        libmateweather
+        mate-menu
+        caja-extensions-common
+        lightdm
+        lightdm-gtk-greeter
+        lightdm-gtk-greeter-settings
+        light-locker
+        plank
+        )
+    pacman -S --needed ${array[@]}; sync
+    # enable LightDM
+    systemctl enable lightdm.service
+    # create 'autologin' group
+    groupadd -r autologin
+    # add user to 'autologin' group
+    gpasswd -a `ls /home` autologin
+}
+
+function install_cinnamon() {
+    # message
+    message="Ok, you chose Cinnamon Desktop Environment..."
+    clear; echo "$message"; sleep 4
+    # install Cinnamon desktop environment
+    array=(
+        cinnamon
+        cinnamon-desktop
+        gdm
+        gksu
+        system-config-printer
+        gnome-terminal
+        nemo-fileroller
+        nemo-seahorse
+        nemo-share
+        plank
+        )
+    pacman -S --needed ${array[@]}; sync
+    # enable gdm 
+    systemctl enable gdm
+    systemctl enable gdm.service
+}
+
+function install_lxde() {
+    # message
+    message="Ok, you chose LXDE Desktop Environment..."
+    clear; echo "$message"; sleep 4
+    # install LXDE desktop environment
+    array=(
+        lxde
+        gksu
+        polkit-gnome
+        community/lxmenu-data
+        community/menumaker
+        community/obconf
+        community/oblogout
+        community/obmenu
+        community/openbox-themes
+        compton
+        lightdm
+        lightdm-gtk-greeter
+        lightdm-gtk-greeter-settings
+        light-locker
+        plank
+        )
+    pacman -S --needed ${array[@]}; sync
+    # enable LightDM
+    systemctl enable lightdm.service
+    # create 'autologin' group
+    groupadd -r autologin
+    # add user to 'autologin' group
+    gpasswd -a `ls /home` autologin
+}
+
+function select_DE() {
+    # message
+    clear
+    echo 'Now we have to chose a Desktop Environment...'
+    echo
+    echo 'This script supports the installation of 5 (five) different'
+    echo 'Desktop Environments.'
+    echo
+    echo 'All you have to do is type **the number** of the Desktop environment'
+    echo 'you want to be installed.'
+    echo 'For example, to install LXDE just type " 4 ".'
+    echo
+    echo 'If you do not choose a number from those below, then the default'
+    echo 'GNOME Desktop Environment will be installed:'
+    echo
+    echo '0. GNOME Shell (default)'
+    echo '1. XFCE4'
+    echo '2. MATE'
+    echo '3. Cinnamon'
+    echo '4. LXDE'
+    echo
+    # user selection
+    read -p "Desktop Environment to be installed: " desktop_environment
+    if [[ "$desktop_environment" == "1" ]]; then
+        install_xfce4
+    elif [[ "$desktop_environment" == "2" ]]; then
+        install_mate
+    elif [[ "$desktop_environment" == "3" ]]; then
+        install_cinnamon
+    elif [[ "$desktop_environment" == "4" ]]; then
+        install_lxde
+    else
+        install_gnome
+    fi
+}
+
+function main() {
+    # main function
+    message="Installing a basic system for your Arch Linux installation..."
+    clear; echo "$message"; sleep 4
+    disable_ipv6
+    set_locales
+    set_timezone
+    enable_dhcpcd
+    set_hostname
+    create_initramfs
+    root_passwd
+    bootloader_select
+    create_user
+    x_server
+    sound_subsystem
+    ttf_fonts
+    select_DE
+    sync
+    pacman -Syyvu
+}
+
+main"$@"
