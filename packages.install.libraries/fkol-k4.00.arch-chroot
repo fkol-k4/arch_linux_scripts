@@ -410,18 +410,47 @@ function install_lxde() {
         lxde
         gksu
         polkit-gnome
-        community/lxmenu-data
-        community/menumaker
-        community/obconf
-        community/oblogout
-        community/obmenu
-        community/openbox-themes
-        compton
-        lightdm
-        lightdm-gtk-greeter
-        lightdm-gtk-greeter-settings
-        light-locker
+        gdm
+        gnome-terminal
+        )
+    pacman -S --needed --color always ${array[@]}; sync
+    # enable LightDM
+    systemctl enable lightdm.service
+    # create 'autologin' group
+    groupadd -r autologin
+    # add user to 'autologin' group
+    gpasswd -a `ls /home` autologin
+}
+
+function install_pantheon() {
+    # message
+    message="Ok, you chose Pantheon Desktop Environment..."
+    clear; echo "$message"; sleep 4
+    # add pantheon DE repository
+    # wiki: https://wiki.archlinux.org/index.php/Pantheon
+	echo
+	echo '# Pantheon repository'
+	echo '# Added by fkol-k4'
+	echo '[pantheon]'
+	echo 'SigLevel = Optional'
+	echo 'Server = http://pkgbuild.com/~alucryd/$repo/$arch'
+	echo
+    # install Pantheon desktop environment
+    array=(
+        `pacman -Ss --color always pantheon | sort | grep 'pantheon/' | grep 'bzr'`
+        community/elementary-icon-theme
+        gksu
+        polkit-gnome
+        nautilus
+        nautilus-open-terminal
+        nautilus-sendto
+        seahorse-nautilus
+        nautilus-actions
+        gnome-terminal
         plank
+        plank-config
+        lightdm
+        light-locker
         )
     pacman -S --needed --color always ${array[@]}; sync
     # enable LightDM
@@ -452,6 +481,7 @@ function select_DE() {
     echo '2. MATE'
     echo '3. Cinnamon'
     echo '4. LXDE'
+    echo '5. Pantheon (elementary OS - unstable version)'
     echo
     # user selection
     read -p "Desktop Environment to be installed: " desktop_environment
@@ -463,6 +493,8 @@ function select_DE() {
         install_cinnamon
     elif [[ "$desktop_environment" == "4" ]]; then
         install_lxde
+    elif [[ "$desktop_environment" == "5" ]]; then
+        install_pantheon
     else
         install_gnome
     fi
