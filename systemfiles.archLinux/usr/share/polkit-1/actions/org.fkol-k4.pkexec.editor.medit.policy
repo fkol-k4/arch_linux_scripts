@@ -4,7 +4,7 @@
  "http://www.freedesktop.org/standards/PolicyKit/1/policyconfig.dtd">
 <policyconfig>
 
-  <action id="org.fkol-k4.pkexec.medit">
+  <action id="org.fkol-k4.pkexec.editor.medit">
     <message>Authentication is required to run medit text editor as root...</message>
     <icon_name>medit</icon_name>
     <defaults>

@@ -4,7 +4,7 @@
  "http://www.freedesktop.org/standards/PolicyKit/1/policyconfig.dtd">
 <policyconfig>
 
-  <action id="org.user.pkexec.caja">
+  <action id="org.fkol-k4.pkexec.filemanager.caja">
     <message>Authentication is required to run Caja File Manager as root...</message>
     <icon_name>system-file-manager</icon_name>
     <defaults>

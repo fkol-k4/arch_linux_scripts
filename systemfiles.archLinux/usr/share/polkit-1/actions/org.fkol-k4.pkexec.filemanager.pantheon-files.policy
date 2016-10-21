@@ -4,15 +4,15 @@
  "http://www.freedesktop.org/standards/PolicyKit/1/policyconfig.dtd">
 <policyconfig>
 
-  <action id="org.user.pkexec.mousepad">
-    <message>Authentication is required to run Mousepad as root...</message>
-    <icon_name>mousepad</icon_name>
+  <action id="org.fkol-k4.pkexec.filemanager.pantheon-files">
+    <message>Authentication is required to run Pantheon File Manager as root...</message>
+    <icon_name>nautilus</icon_name>
     <defaults>
-      <allow_any>no</allow_any>
+      <allow_any>auth_admin</allow_any>
       <allow_inactive>auth_admin</allow_inactive>
       <allow_active>yes</allow_active>
     </defaults>
-    <annotate key="org.freedesktop.policykit.exec.path">/usr/bin/mousepad</annotate>
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/bin/pantheon-files</annotate>
     <annotate key="org.freedesktop.policykit.exec.allow_gui">true</annotate>
   </action>
 

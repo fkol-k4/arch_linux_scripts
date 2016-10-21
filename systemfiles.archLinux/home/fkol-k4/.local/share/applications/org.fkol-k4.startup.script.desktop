@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Startup Scripts
+GenericName=Custom Script Tool
+Comment=Run a custom script on system startup
+Icon=desktop-effects
+Exec=fkol-k4.startup.script
+NoDisplay=false
+Categories=DesktopSettings;FileTools;Utility;
+StartupNotify=false
+Terminal=false
