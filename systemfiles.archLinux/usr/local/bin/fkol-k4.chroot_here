@@ -29,5 +29,7 @@ sudo mount --rbind /run run
 
 sudo cp -L /etc/resolv.conf etc/resolv.conf
 
+export PATH="$PATH:/bin"
+
 sudo chroot . /bin/bash
 

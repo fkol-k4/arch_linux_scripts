@@ -64,6 +64,7 @@ alias l='ls -CF'
 ##  fkol-k4 additions
 ##  =================
 GPG_KEY="AC5A0B22"
+export EDITOR=/usr/bin/nano 
 
 #   Aliases
 alias fkol_date="date +%Y-%m-%d"
@@ -74,6 +75,7 @@ alias fkol_unhide-startups="sudo sed -i 's/NoDisplay=true/NoDisplay=false/g' /et
 alias fkol_getkey="sudo gpg --recv-keys --keyserver "
 alias fkol_get_cower_key="sudo gpg --recv-keys --keyserver hkp://pgp.mit.edu 1EB2638FF56C0C53 "
 alias fkol_update-grub='sudo /usr/sbin/grub-mkconfig -o /boot/grub/grub.cfg'
+alias pacman='pacman --color always'
 
 #   Functions
 function fkol_updates() {

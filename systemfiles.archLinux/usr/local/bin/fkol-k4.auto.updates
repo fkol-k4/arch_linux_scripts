@@ -21,61 +21,46 @@
 #   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 
-#   CLEAR CONSOLE
-#   ===========================
-clear
+function take_snapshot() {
+    # Our installation is inside a BTRFS subvolume. We need an extra mountpoint
+    # for the system's partition so that we have the ability to manage our 
+    # installation's subvolume (snapshot creation and deletion).
+    # This mountpoint must have its own /etc/fstab entry.
+    # The value below is an example.
+    ROOT_PARTITION_MOUNTPOINT="/mnt/mountpoint"
+    # The name of the subvolume that our system uses for " / " mountpoint
+    # The value below is an example.
+    SUBVOLUME_NAME="SubvolName"
+    # Delete every snapshot except the last three taken.
+    for i in $(ls $ROOT_PARTITION_MOUNTPOINT/ | sort | grep $SUBVOLUME_NAME-snapshot-on- | head -n -3); do
+        sudo btrfs subvolume delete "$ROOT_PARTITION_MOUNTPOINT/$i"
+    done
+    # Create a new snapshot
+    sudo btrfs subvolume snapshot "$ROOT_PARTITION_MOUNTPOINT/$SUBVOLUME_NAME" "$ROOT_PARTITION_MOUNTPOINT/$SUBVOLUME_NAME-snapshot-on-$(date +%Y-%m-%d-%T)"
+    sync
+}
 
-#   SCRIPT VARIABLES DEFINITION
-#   ===========================
-#   Our installation is inside a BTRFS subvolume. We need an extra mountpoint
-#   for the system's partition so that we have the ability to manage our 
-#   installation's subvolume (snapshot creation and deletion).
-#   This mountpoint must have its own /etc/fstab entry.
-#   The value below is an example.
-ROOT_PARTITION_MOUNTPOINT="/mnt/Linux-HDD"
-#   The name of the subvolume that our system uses for " / " mountpoint
-#   The value below is an example.
-SUBVOLUME_NAME=""
+function update_system() {
+    # official repository packages
+    sudo pacman --color always -Syyvu
+    # AUR packages
+    if [[ `which pacaur` ]]; then
+        # use pacaur if installed
+        pacaur --color always --check
+        pacaur --color always --update
+    elif [[ `which yaourt` ]]; then
+        # fallback to yaourt (if installed)
+        yaourt -Sau
+    fi
+    # file database
+    sudo updatedb
+    sync
+}
 
-#   SNAPSHOTS
-#   =========
-#   1. Delete every snapshot except the last three taken.
-for i in $(ls $ROOT_PARTITION_MOUNTPOINT/ | sort | grep $SUBVOLUME_NAME-snapshot-on- | head -n -3); do
-    sudo btrfs subvolume delete "$ROOT_PARTITION_MOUNTPOINT/$i"
-done
-#   2. Create a new snapshot
-sudo btrfs subvolume snapshot "$ROOT_PARTITION_MOUNTPOINT/$SUBVOLUME_NAME" "$ROOT_PARTITION_MOUNTPOINT/$SUBVOLUME_NAME-snapshot-on-$(date +%Y-%m-%d-%T)"
-#   3. Sync disk I/O
-sync
-
-
-#   UPDATES
-#   =======
-#   Update official repository packages
-sudo pacman -Syyvu
-#   Update AUR packages
-if [[ `which pacaur` ]]; then
-    # use pacaur if installed
-    pacaur --check
-    pacaur --update
-elif [[ `which yaourt` ]]; then
-    # fallback to yaourt (if installed)
-    yaourt -Sau
-fi
-#   Update file database
-sudo updatedb
-#   Sync disk I/O
-sync
-
-
-#   GRUB2 HANDLING
-#   ==============
-#   Update GRUB2 configuration
-sudo grub-mkconfig -o /boot/grub/grub.cfg
-
-
-#   USER NOTIFICATION && UPDATES SCRIPT EXIT
-#   ========================================
+function update_grub() {
+    # Update GRUB2 configuration
+    sudo grub-mkconfig -o /boot/grub/grub.cfg
+}
 
 function user_notify() {
     # notify user on terminal
@@ -95,6 +80,7 @@ function user_notify() {
         fi
     fi
 }
+
 function user_wait() {
     # -s: do not echo input character
     # -n 1: read only 1 character (separate with space)
@@ -102,10 +88,17 @@ function user_wait() {
     clear; echo; echo
     echo "The terminal window will close in four (4) seconds."
     echo "See you next time $USER..."
+    sleep 4; clear; exit 0
 }
 
-user_notify
-user_wait
-sleep 4
-clear
-exit
+function main() {
+    # main function
+    clear
+    take_snapshot
+    update_system
+    update_grub
+    user_notify
+    user_wait
+}    
+
+main"$@"
