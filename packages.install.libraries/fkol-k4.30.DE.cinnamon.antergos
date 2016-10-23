@@ -74,7 +74,10 @@ function cinnamon_AUR() {
 		mint-y-icons-git
 		xubuntu-artwork
 		)
-    pacaur --sync --needed --color always --noedit ${array[@]}; sync
+    for package in ${array[@]}; do
+        pacaur --sync --needed --color always --noedit "$package"
+    done
+    sync
 }
 
 function chars_indicator() {

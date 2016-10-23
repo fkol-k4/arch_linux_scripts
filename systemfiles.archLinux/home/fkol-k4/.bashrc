@@ -72,8 +72,8 @@ alias fkol_date-with-time="date +%Y-%m-%d-%T"
 alias fkol_unhide-applications="sudo sed -i 's/NoDisplay=true/NoDisplay=false/g' /usr/share/applications/*.desktop "
 alias fkol_unhide-gnome-startups="sudo sed -i 's/NoDisplay=true/NoDisplay=false/g' /usr/share/gnome/autostart/*.desktop "
 alias fkol_unhide-startups="sudo sed -i 's/NoDisplay=true/NoDisplay=false/g' /etc/xdg/autostart/*.desktop "
-alias fkol_getkey="sudo gpg --recv-keys --keyserver "
-alias fkol_get_cower_key="sudo gpg --recv-keys --keyserver hkp://pgp.mit.edu 1EB2638FF56C0C53 "
+alias fkol_getkey="gpg --recv-keys --keyserver "
+alias fkol_get_cower_key="gpg --recv-keys --keyserver hkp://pgp.mit.edu 1EB2638FF56C0C53 "
 alias fkol_update-grub='sudo /usr/sbin/grub-mkconfig -o /boot/grub/grub.cfg'
 alias pacman='pacman --color always'
 
@@ -99,8 +99,3 @@ function fkol_DE_reset() {
     rm -rf $HOME/.xfce
     rm -rf $HOME/.cinnamon
 }
-
-
-#   Add ~/.bin/ && ~/.local/bin/ to PATH:
-[[ -d "$HOME/.local/bin" ]] && PATH="$PATH:$HOME/.local/bin" && export PATH
-

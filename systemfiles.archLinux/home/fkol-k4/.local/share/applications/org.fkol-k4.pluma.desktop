@@ -1,6 +1,6 @@
 [Desktop Entry]
-Name=Pluma
-GenericName=Text Editor
+Name=Pluma (fkol-k4)
+GenericName=MATE Text Editor
 Comment=Edit text files
 Exec=pluma %U
 Terminal=false

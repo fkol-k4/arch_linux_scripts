@@ -21,6 +21,8 @@
 #   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 
+export PATH="$PATH:/bin"
+
 sudo mount -t proc /proc proc
 sudo mount --rbind /dev dev
 sudo mount --rbind /dev/pts dev/pts
@@ -28,8 +30,6 @@ sudo mount --rbind /sys sys
 sudo mount --rbind /run run
 
 sudo cp -L /etc/resolv.conf etc/resolv.conf
-
-export PATH="$PATH:/bin"
 
 sudo chroot . /bin/bash
 

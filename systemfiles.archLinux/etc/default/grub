@@ -47,12 +47,8 @@ GRUB_DISABLE_RECOVERY=true
 #GRUB_SAVEDEFAULT="true"
 
 ##  Added after the installation for GRUB2 setting:
-#   Set 20 sec timeout for GRUB2 menu
 GRUB_TIMEOUT=20
-#   Disable Linux kernal IpV6
 GRUB_CMDLINE_LINUX="ipv6.disable=1 elevator=cfq i915.enable_psr=0 "
-#   Set GRUB2 menu resolution (auto)
 GRUB_GFXMODE=auto
-#   Keep  resolution for boot process
 GRUB_GFXPAYLOAD_LINUX=keep
-
+#GRUB_BACKGROUND="/path/to/{png,tga}"

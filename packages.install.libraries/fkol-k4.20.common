@@ -29,7 +29,10 @@ function markdown_editors () {
         haroopad
         remarkable
         )
-    pacaur --sync --needed --color always --noedit ${array[@]}; sync
+    for package in ${array[@]}; do
+        pacaur --sync --needed --color always --noedit "$package"
+    done
+    sync
 }
 
 function megasync_client() {
@@ -58,7 +61,10 @@ function web_related() {
         google-chrome
         google-talkplugin
         )
-    pacaur --sync --needed --color always --noedit ${array_aur[@]}; sync
+    for package in ${array_aur[@]}; do
+        pacaur --sync --needed --color always --noedit "$package"
+    done
+    sync
 }
 
 function media_packages() {
@@ -95,7 +101,10 @@ function media_packages() {
         gimp-plugin-texturize
         gimp-plugin-registry
         )
-    pacaur --sync --needed --color always --noedit ${array_aur[@]}; sync
+    for package in ${array_aur[@]}; do
+        pacaur --sync --needed --color always --noedit "$package"
+    done
+    sync
 }
 
 function office() {

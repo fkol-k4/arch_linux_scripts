@@ -20,6 +20,44 @@
 #   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 
-#if [[ -d /Files ]] && [[ -d /Backup ]]; then
-#    rsync -aqz --log-file=/Backup/rsync-backup.log /Files/ /Backup/
-#fi
+function backup_music() {
+    src="/Files-WD/Music"
+    dst="/mnt/BackupFiles/Music"
+    logfile="$src/rsync-backup.log"
+    if [[ -d $src ]] && [[ -d $dst ]]; then
+        rsync -aqz --log-file=$logfile $src/ $dst/
+        sync
+    fi
+}
+
+function backup_keys() {
+    src="/Files-WD/keys"
+    dst="/mnt/BackupFiles/keys"
+    logfile="$src/rsync-backup.log"
+    if [[ -d $src ]] && [[ -d $dst ]]; then
+        rsync -aqz --log-file=$logfile $src/ $dst/
+        sync
+    fi
+}
+
+function backup_documents() {
+    src="/Files-WD/Documents"
+    dst="/mnt/BackupFiles/Documents"
+    logfile="$src/rsync-backup.log"
+    if [[ -d $src ]] && [[ -d $dst ]]; then
+        rsync -aqz --log-file=$logfile $src/ $dst/
+        sync
+    fi
+}
+
+function main() {
+    # main function
+    #message=""
+    #clear; echo "$message"; sleep 4
+    backup_keys
+    backup_documents
+    backup_music
+    sync
+}
+
+#main "$@"

@@ -72,7 +72,7 @@ function user_notify() {
     # notify user via notification (if possible)
     if [[ `which notify-send` ]]; then
         ICON="/usr/share/icons/fkol-k4/fkol-k4.donkey.svg"
-        MESSAGE='Updates completed. Check your terminal!'
+        MESSAGE='Updates completed. Please check your terminal!'
         if [ -f "$ICON" ]; then
             notify-send -i "$ICON" -t 4000 "$MESSAGE"
         else

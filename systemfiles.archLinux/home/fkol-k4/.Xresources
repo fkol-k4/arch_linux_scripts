@@ -8,8 +8,9 @@ Xft.lcdfilter:  lcddefault
 Xft.rgba:       rgb
 
 ! Use a nice truetype font and size by defaultfor Xterm
-xterm*faceName: DejaVu Sans Mono Book
-xterm*faceSize: 9
+! xterm*faceName: DejaVu Sans Mono Book
+xterm*faceName: Monospace
+xterm*faceSize: 10
 
 ! xterm scrollback
 xterm*savelines: 10000000
