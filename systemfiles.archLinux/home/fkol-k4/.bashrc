@@ -99,3 +99,29 @@ function fkol_DE_reset() {
     rm -rf $HOME/.xfce
     rm -rf $HOME/.cinnamon
 }
+
+function fkol_network_restart() {
+    # restart network systems
+    sudo ip addr flush wlp1s0
+    sudo systemctl restart networking.service
+}
+
+function fkol_disable_NetworkManager_wait_online_service() {
+    # disable service
+    sudo systemctl disable NetworkManager-wait-online.service
+}
+
+function fkol_disable_SnapPackages() {
+    # Disable service
+    sudo systemctl disable snapd.service
+}
+
+function fkol_disable_TouchPad() {
+    # Disable Touchpad
+    synclient TouchpadOff=1
+}
+
+function fkol_enable_TouchPad() {
+    # Enable Touchpad
+    synclient TouchpadOff=0
+}
