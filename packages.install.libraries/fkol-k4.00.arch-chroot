@@ -40,10 +40,10 @@ function set_locales() {
     export LANG=en_US.UTF-8
     locale > /etc/locale.conf
 }
-
+	
 function set_timezone() {
     # set system timezone
-    ln -sf /usr/share/zoneinfo/Europe/Athens /etc/localtime
+    ln -sf /usr/share/zoneinfo/Europe/Copenhagen /etc/localtime
     # set hardware clock to UTC
     hwclock --systohc --utc
 }
@@ -135,7 +135,8 @@ function bootloader_efi() {
     echo 'Just type the part after /dev/.'
     echo 'Example:'
     echo 'type " sda " to select /dev/sda'
-    echo 'type " sda2 " to select /dev/sda2'; echo
+    echo 'type " sda2 " to select /dev/sda2'
+    echo 'type " nvme0n1 " to select /dev/nvme0n1'; echo
     read -p "Install GRUB2 to: " grub_target
     grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=arch --boot-directory=/boot --recheck /dev/"$grub_target"
     # disable some grub settings
@@ -306,7 +307,6 @@ function install_gnome() {
     array=(
         gnome
         gnome-extra
-        gksu
         alacarte
         eog-plugins
         gnome-alsamixer
@@ -333,7 +333,6 @@ function install_xfce4() {
     array=(
         xfce4
         xfce4-goodies
-        gksu
         lightdm
         lightdm-gtk-greeter
         lightdm-gtk-greeter-settings
@@ -358,7 +357,6 @@ function install_mate() {
     array=(
         mate
         mate-extra
-        gksu
         libmatekbd
         libmateweather
         mate-menu
@@ -387,7 +385,6 @@ function install_cinnamon() {
         cinnamon
         cinnamon-desktop
         gdm
-        gksu
         system-config-printer
         gnome-terminal
         nemo-fileroller
@@ -408,7 +405,6 @@ function install_lxde() {
     # install LXDE desktop environment
     array=(
         lxde
-        gksu
         polkit-gnome
         gdm
         gnome-terminal
@@ -439,7 +435,6 @@ function install_pantheon() {
     array=(
         `pacman -Ss --color always pantheon | sort | grep 'pantheon/' | grep 'bzr'`
         community/elementary-icon-theme
-        gksu
         polkit-gnome
         nautilus
         nautilus-open-terminal
