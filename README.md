@@ -61,7 +61,7 @@ if we want separate '/home' partition:
 
 ####Install the base system (-i => interactive, you can skip it if you want)
 
-`# pacstrap -i /mnt base base-devel xorg`
+`# pacstrap /mnt base linux linux-firmware xorg`
 
 ####Generate fstab file
 
